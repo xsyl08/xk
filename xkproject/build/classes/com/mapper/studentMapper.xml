@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+ <mapper namespace="com.zh.dao.StudentDao">
+ 	<select id="studentLogin" parameterType="com.zh.vo.Student" resultType="com.zh.vo.Student">
+ 		select s.*,c.* from student s,college c where s.college_id=c.college_id and 
+ 		s.student_name=#{student.student_name} and s.student_pwd=#{student.student_pwd}
+ 	</select>
+ 	<update id="editStudentInfo" parameterType="com.zh.vo.Student">
+ 		update student set student_pwd=#{student.student_pwd} where student_id=#{student.student_id}
+ 	</update>
+ 	<!-- 根据学生ID和学期查询所选课程 -->
+ 	<select id="queryCourseByStudent" resultType="com.zh.vo.Course">
+ 		SELECT sc.*,ti.time_detail,c.class_name,t.teacher_name 
+ 		FROM stutocou sc,timeinfo ti,course c,teacher t 
+ 		WHERE sc.time_id=ti.time_id AND sc.class_id=c.class_id AND c.teacher_id=t.teacher_id 
+ 		AND sc.student_id=#{student.student_id} and sc.term_id=#{term.term_id}
+ 	</select>
+ 	<!-- 查询学生考试成绩 -->
+ 	<select id="queryScoreByStudent" resultType="com.zh.vo.Course">
+ 		SELECT c.class_id,c.class_name,t.teacher_name,sc.class_score,sc.score_point,l.score_level,sc.getgrade
+ 		FROM student s,course c,stutocou sc,teacher t,level l  
+ 		WHERE s.student_id=sc.student_id AND c.class_id=sc.class_id AND c.teacher_id=t.teacher_id and sc.level_id=l.level_id 
+ 		AND s.student_id=#{student.student_id} and sc.term_id=#{term.term_id}
+ 	</select>
+ 	<!-- 在中间表stutocou中查找记录 -->
+ 	<select id="queryFromMyCourseByStuToCou" parameterType="com.zh.vo.StuToCou" resultType="com.zh.vo.StuToCou">
+ 		select * from stutocou where class_id=#{stuToCou.class_id} and student_id=#{stuToCou.student_id} and term_id=#{stuToCou.term_id}
+ 	</select>
+ 	<!-- 添加到课程表，即中间表stutocou中 -->
+ 	<insert id="addToMyCourse" parameterType="com.zh.vo.StuToCou">
+ 		insert into stutocou(student_id,class_id,class_place,class_weekday,time_id,term_id) 
+ 		values(#{stuToCou.student_id},#{stuToCou.class_id},#{stuToCou.class_place},#{stuToCou.class_weekday},#{stuToCou.time_id},#{stuToCou.term_id})
+ 	</insert>
+ 	<!-- 从课程表即中间表stutocou中删除记录 -->
+ 	<update id="deleteFromMyCourse" parameterType="com.zh.vo.StuToCou">
+ 		delete from stutocou where class_id=#{stuToCou.class_id} AND class_place=#{stuToCou.class_place} 
+ 		AND class_weekday=#{stuToCou.class_weekday} AND time_id=#{stuToCou.time_id} AND term_id=#{stuToCou.term_id}
+ 	</update>
+ 	<!-- 增加课程当前所选人数 -->
+ 	<update id="addCurrentQuantityByStuToCou" parameterType="com.zh.vo.StuToCou">
+ 		update classtime set currentquantity=IFNULL(currentquantity,0)+1 
+ 		where class_id=#{stuToCou.class_id} AND class_place=#{stuToCou.class_place} AND class_weekday=#{stuToCou.class_weekday} 
+ 		AND time_id=#{stuToCou.time_id} AND term_id=#{stuToCou.term_id}
+ 	</update>
+ 	<!-- 减少课程当前所选人数 -->
+ 	<update id="minusCurrentQuantityByStuToCou" parameterType="com.zh.vo.StuToCou">
+ 		update classtime set currentquantity=currentquantity-1 
+ 		where class_id=#{stuToCou.class_id} AND class_place=#{stuToCou.class_place} AND class_weekday=#{stuToCou.class_weekday} 
+ 		AND time_id=#{stuToCou.time_id} AND term_id=#{stuToCou.term_id}
+ 	</update>
+ </mapper>

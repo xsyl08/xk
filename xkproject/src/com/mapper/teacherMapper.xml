@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+ <mapper namespace="com.zh.dao.TeacherDao">
+ 	<select id="teacherLogin" parameterType="com.zh.vo.Teacher" resultType="com.zh.vo.Teacher">
+ 		select * from teacher t,college c where t.college_id=c.college_id and teacher_name=#{teacher.teacher_name} and teacher_pwd=#{teacher.teacher_pwd}
+ 	</select>
+ 	<update id="editTeacherInfo" parameterType="com.zh.vo.Teacher">
+ 		update teacher set teacher_pwd=#{teacher.teacher_pwd} where teacher_id=#{teacher.teacher_id}
+ 	</update>
+ 	<select id="queryCourseByTeacher" parameterType="com.zh.vo.Teacher" resultType="com.zh.vo.Course">
+ 		select ct.*,c.class_name,c.class_grade,c.class_capacity,ti.time_detail,t.teacher_name 
+ 		from course c,classtime ct,timeinfo ti,teacher t 
+ 		where c.teacher_id=t.teacher_id and c.class_id=ct.class_id and ct.time_id=ti.time_id and t.teacher_id=#{teacher.teacher_id}
+ 	</select>
+ 	<update id="updateStuToCouClassScore" parameterType="com.zh.vo.StuToCou">
+ 		update stutocou set class_score=#{stuToCou.class_score},score_point=#{stuToCou.score_point},level_id=#{stuToCou.level_id},getgrade=#{stuToCou.getgrade} 
+ 		where student_id=#{stuToCou.student_id} and  class_id=#{stuToCou.class_id} and class_place=#{stuToCou.class_place} 
+ 		and class_weekday=#{stuToCou.class_weekday} and time_id=#{stuToCou.time_id} and term_id=#{stuToCou.term_id}
+ 	</update>
+ 	<select id="queryCourseByCourseId" parameterType="string" resultType="com.zh.vo.Course">
+ 		select * from course where class_id=#{class_id}
+ 	</select>
+ 	<insert id="addCourse" parameterType="com.zh.vo.Course">
+ 		insert into course value(#{course.class_id},#{course.class_name},#{course.class_grade},#{course.class_capacity},#{course.teacher_id})
+ 	</insert>
+ 	<insert id="addClassTime"  parameterType="com.zh.vo.Course">
+ 		insert into classtime(class_id,class_place,class_weekday,time_id,term_id) value(#{course.class_id},#{course.class_place},
+ 		#{course.class_weekday},#{course.time_id},#{course.term_id})
+ 	</insert>
+ 	<update id="modifyCourse" parameterType="com.zh.vo.Course">
+ 		update course set class_id=#{course.class_id},class_name=#{course.class_name},class_grade=#{course.class_grade},
+ 		class_capacity=#{course.class_capacity} where class_id=#{course.class_id}
+ 	</update>
+ 	<update id="modifyClassTime" parameterType="com.zh.vo.Course">
+ 		update classtime set class_id=#{course.class_id},class_place=#{course.class_place},class_weekday=#{course.class_weekday},
+ 		time_id=#{course.time_id},term_id=#{course.term_id} where class_id=#{course.class_id}
+ 	</update>
+ </mapper>
