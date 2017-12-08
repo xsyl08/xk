@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+ <mapper namespace="com.zh.dao.CourseDao">
+ 	<!-- 分页查询符合条件的课程 -->
+ 	<select id="queryAllCourse" parameterType="com.zh.vo.Course" resultType="com.zh.vo.Course">
+ 		select ct.*,c.class_name,c.class_grade,c.class_capacity,ti.time_detail,t.teacher_name 
+ 		from course c,classtime ct,timeinfo ti,teacher t 
+ 		where c.teacher_id=t.teacher_id and c.class_id=ct.class_id and ct.time_id=ti.time_id
+ 		<if test="course.term_id!=0">
+ 			and ct.term_id=#{course.term_id}
+ 		</if>
+ 		<if test="course.class_name!=null and course.class_name!=''">
+ 			and c.class_name like '%${course.class_name}%'
+ 		</if>
+ 		<if test="course.teacher_name!=null and course.teacher_name!=''">
+ 			and t.teacher_name like '%${course.teacher_name}%'
+ 		</if>
+ 		<if test="course.time_detail!=null and course.time_detail!=''">
+ 			and ti.time_detail like '%${course.time_detail}%'
+ 		</if>
+ 		<if test="pageBean!=null">
+ 			limit ${pageBean.page},${pageBean.rows}
+ 		</if>
+ 	</select>
+ 	<!-- 查询符合条件的课程总记录数 -->
+ 	<select id="getAllCourseCount" parameterType="com.zh.vo.Course" resultType="integer">
+ 		select count(c.class_id) from course c,classtime ct,timeinfo ti,teacher t 
+ 		where c.teacher_id=t.teacher_id and c.class_id=ct.class_id and ct.time_id=ti.time_id
+ 		<if test="course.term_id!=0">
+ 			and ct.term_id=#{course.term_id}
+ 		</if>
+ 		<if test="course.class_name!=null and course.class_name!=''">
+ 			and c.class_name like '%${course.class_name}%'
+ 		</if>
+ 		<if test="course.teacher_name!=null and course.class_name!=''">
+ 			and t.teacher_name like '%${course.teacher_name}%'
+ 		</if>
+ 		<if test="course.time_detail!=null and course.time_detail!=''">
+ 			and ti.time_detail like '%${course.time_detail}%'
+ 		</if>
+ 	</select>
+ 	<!-- 根据课程信息查询当前所选学生 -->
+ 	<select id="queryStudentByStuToCou" parameterType="com.zh.vo.StuToCou" resultType="com.zh.vo.Student">
+ 		select * from student s,stutocou sc,course c,college cl 
+ 		where s.student_id=sc.student_id and sc.class_id=c.class_id and s.college_id=cl.college_id 
+ 		and sc.class_id=#{stuToCou.class_id} and sc.class_place=#{stuToCou.class_place} and sc.class_weekday=#{stuToCou.class_weekday} 
+ 		and sc.time_id=#{stuToCou.time_id} and sc.term_id=#{stuToCou.term_id}
+ 	</select>
+ 	<!-- 根据课程表查询课程详细信息 -->
+ 	<select id="queryCourseByStuToCou" parameterType="com.zh.vo.StuToCou" resultType="com.zh.vo.Course">
+ 		SELECT ct.*,c.class_grade,c.class_capacity,ti.time_detail FROM course c,classtime ct,timeinfo ti 
+ 		WHERE c.class_id=ct.class_id AND ct.time_id=ti.time_id 
+ 		AND ct.class_id=#{stuToCou.class_id} AND ct.class_place=#{stuToCou.class_place} AND ct.class_weekday=#{stuToCou.class_weekday} 
+ 		AND ct.time_id=#{stuToCou.time_id} AND ct.term_id=#{stuToCou.term_id}
+ 	</select>
+ </mapper>
