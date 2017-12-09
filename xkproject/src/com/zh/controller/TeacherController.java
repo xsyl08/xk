@@ -16,9 +16,11 @@ import com.zh.service.CourseService;
 import com.zh.service.LevelService;
 import com.zh.service.StudentService;
 import com.zh.service.TeacherService;
+import com.zh.util.DateUtil;
 import com.zh.vo.Course;
 import com.zh.vo.Level;
 import com.zh.vo.StuToCou;
+import com.zh.vo.Student;
 import com.zh.vo.Teacher;
 
 @RequestMapping("/teacherController")
@@ -34,19 +36,47 @@ public class TeacherController {
 	private CourseService courseService;
 
 	/**
-	 * 教师登录
-	 * @param teacher
-	 * @param session
+	 * 用户登录，首先判断是学生还是教师，然后在对应的数据库表中查询
+	 * @param user_name
+	 * @param user_pwd
+	 * @param user_type
+	 * @param req
 	 * @return
 	 */
-	@RequestMapping("/teacherLogin")
-	public String teacherLogin(@Param("teacher") Teacher teacher, HttpSession session) {
-		teacher = teacherService.teacherLogin(teacher);
-		if(teacher!=null) {
-			session.setAttribute("currentTeacher", teacher);
-			return "jsp/teacher/teacherIndex";
+	@RequestMapping("/userLogin")
+	public String userLogin(@Param("user_name") String user_name,@Param("user_pwd") String user_pwd, 
+			@Param("user_type") String user_type, HttpServletRequest req) {
+		req.getSession().setAttribute("user_name", user_name);
+		req.getSession().setAttribute("user_pwd", user_pwd);
+		if(user_type==null||"".equals(user_type)) {
+			req.getSession().setAttribute("msg", "请选择学生或教师登录");
+			return "redirect:../userLogin.jsp";
+		}else if("学生".equals(user_type)) {
+			Student s = new Student();
+			s.setStudent_name(user_name);
+			s.setStudent_pwd(user_pwd);
+			Student student = studentService.studentLogin(s);
+			if(student!=null) {
+				req.getSession().removeAttribute("user_name");
+				req.getSession().removeAttribute("user_pwd");
+				student.setStudent_age(2017-DateUtil.getYear(student.getStudent_birthday()));
+				req.getSession().setAttribute("currentStudent", student);
+				return "jsp/student/studentIndex";
+			}
+		}else if("教师".equals(user_type)) {
+			Teacher t = new Teacher();
+			t.setTeacher_name(user_name);
+			t.setTeacher_pwd(user_pwd);
+			Teacher teacher = teacherService.teacherLogin(t);
+			if(teacher!=null) {
+				req.getSession().removeAttribute("user_name");
+				req.getSession().removeAttribute("user_pwd");
+				req.getSession().setAttribute("currentTeacher", teacher);
+				return "jsp/teacher/teacherIndex";
+			}
 		}
-		return "redirect:../teacherLogin.jsp";
+		req.getSession().setAttribute("msg", "用户名或密码错误");
+		return "redirect:../userLogin.jsp";
 	}
 	/**
 	 * 教师查询个人信息
@@ -69,7 +99,7 @@ public class TeacherController {
 	@RequestMapping("/teacherLogout")
 	public String teacherLogout(HttpSession session) {
 		session.removeAttribute("currentTeacher");
-		return "redirect:../teacherLogin.jsp";
+		return "redirect:../userLogin.jsp";
 	}
 	/**
 	 * 教师编辑个人信息

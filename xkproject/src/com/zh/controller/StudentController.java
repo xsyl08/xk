@@ -40,22 +40,6 @@ public class StudentController {
 	@Resource
 	private CourseService courseService;
 	/**
-	 * 学生登录，登录成功将学生信息保存到session中
-	 * @param student
-	 * @param req
-	 * @return
-	 */
-	@RequestMapping("/studentLogin")
-	public String studentLogin(@Param("student") Student student, HttpServletRequest req) {
-		student = studentService.studentLogin(student);
-		if(student!=null) {
-			student.setStudent_age(2017-DateUtil.getYear(student.getStudent_birthday()));
-			req.getSession().setAttribute("currentStudent", student);
-			return "jsp/student/studentIndex";
-		}
-		return "redirect:../studentLogin.jsp";
-	}
-	/**
 	 * 注销登录，将学生信息从session中清除
 	 * @param req
 	 * @return
@@ -63,7 +47,7 @@ public class StudentController {
 	@RequestMapping("/studentLogout")
 	public String studentLogout(HttpServletRequest req) {
 		req.getSession().removeAttribute("currentStudent");
-		return "redirect:../studentLogin.jsp";
+		return "redirect:../userLogin.jsp";
 	}
 	/**
 	 * 查询学生个人信息
